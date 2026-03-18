@@ -1,0 +1,2367 @@
+\u003Chtml lang="en">\u003Chead>
+    \u003Cmeta charset="UTF-8">
+    \u003Cmeta name="viewport" content="width=device-width, initial-scale=1.0">
+    \u003Ctitle>InstaVault Admin Panel SovitX\u003C/title>
+    \u003Clink href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    \u003Clink rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    \u003Clink href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    \u003Cstyle>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #38ef7d;
+            --danger-color: #f45c43;
+            --dark-color: #2d3748;
+            --light-color: #f7fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.3);
+            overflow-y: auto;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            text-align: center;
+            position: relative;
+        }
+
+        .sidebar-header h3 {
+            color: white;
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .close-sidebar {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-sidebar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 15px 30px;
+            color: #cbd5e0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: var(--primary-color);
+            padding-left: 40px;
+        }
+
+        .menu-item.active {
+            background: rgba(102, 126, 234, 0.2);
+            color: white;
+            border-left-color: var(--primary-color);
+        }
+
+        .menu-item i {
+            font-size: 20px;
+            width: 25px;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .overlay.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        /* Topbar */
+        .topbar {
+            background: white;
+            padding: 20px 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .menu-toggle {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .menu-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .topbar-title {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 30px;
+            min-height: calc(100vh - 85px);
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeInUp 0.5s;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Dashboard Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card:nth-child(1) .stat-icon {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .stat-card:nth-child(4) .stat-icon {
+            background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--dark-color);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-card h2 {
+            margin-bottom: 30px;
+            color: var(--dark-color);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .form-card h2 i {
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 18px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .btn-success-gradient {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border: none;
+            color: white;
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .btn-success-gradient:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(17, 153, 142, 0.4);
+            color: white;
+        }
+
+        .btn-danger-gradient {
+            background: linear-gradient(135deg, #eb3349, #f45c43);
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-danger-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(235, 51, 73, 0.4);
+        }
+
+        /* Screenshot Container */
+        .screenshot-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .screenshot-item .form-control {
+            flex: 1;
+        }
+
+        .btn-remove-screenshot {
+            background: linear-gradient(135deg, #eb3349, #f45c43);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add-screenshot {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        /* Orders Table */
+        .orders-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .order-card {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+            transition: all 0.3s;
+        }
+
+        .order-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .order-card h5 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .order-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .order-detail:last-child {
+            border-bottom: none;
+        }
+
+        .order-detail-label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .order-detail-value {
+            color: #718096;
+        }
+
+        /* Promo Code Card */
+        .promo-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .promo-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .promo-code-display {
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Promo Action Buttons */
+        .promo-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-promo-action {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            min-width: 100px;
+        }
+
+        .btn-promo-action:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-promo-edit {
+            background: rgba(17, 153, 142, 0.3);
+            border-color: rgba(17, 153, 142, 0.5);
+        }
+
+        .btn-promo-copy {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-promo-share {
+            background: rgba(56, 239, 125, 0.3);
+            border-color: rgba(56, 239, 125, 0.5);
+        }
+
+        .btn-promo-delete {
+            background: rgba(235, 51, 73, 0.3);
+            border-color: rgba(235, 51, 73, 0.5);
+        }
+
+        /* Product Card */
+        .product-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+            transition: all 0.3s;
+            display: flex;
+            gap: 20px;
+        }
+
+        .product-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .product-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 18px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .product-original-price {
+            text-decoration: line-through;
+            color: #718096;
+            margin-left: 10px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #eb3349, #f45c43);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(235, 51, 73, 0.4);
+        }
+
+        /* Alert Styles */
+        .alert-custom {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            min-width: 300px;
+            z-index: 9999;
+            animation: slideInRight 0.5s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            border: none;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .spinner-border {
+            width: 50px;
+            height: 50px;
+            border-width: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 15px;
+            }
+
+            .topbar {
+                padding: 15px 20px;
+            }
+
+            .form-card {
+                padding: 25px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-card {
+                flex-direction: column;
+            }
+
+            .product-image {
+                width: 100%;
+                height: 200px;
+            }
+        }
+
+        /* Random Generate Button */
+        .btn-random {
+            background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .btn-random:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(166, 193, 238, 0.4);
+        }
+
+        .input-with-button {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-with-button .form-control {
+            flex: 1;
+        }
+
+        /* Notification Preview */
+        .notification-preview {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .notification-preview h5 {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .notification-preview p {
+            margin: 5px 0;
+            opacity: 0.95;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+    \u003C/style>
+\u003C/head>
+\u003Cbody data-aos-easing="ease" data-aos-duration="800" data-aos-delay="0">
+    \u003C!-- Overlay -->
+    \u003Cdiv class="overlay" id="overlay" onclick="closeSidebar()">\u003C/div>
+
+    \u003C!-- Sidebar -->
+    \u003Cdiv class="sidebar" id="sidebar">
+        \u003Cdiv class="sidebar-header">
+            \u003Ch3>\u003Ci class="fas fa-shield-alt">\u003C/i> InstaVault\u003C/h3>
+            \u003Cbutton class="close-sidebar" onclick="closeSidebar()">
+                \u003Ci class="fas fa-times">\u003C/i>
+            \u003C/button>
+        \u003C/div>
+        \u003Cdiv class="sidebar-menu">
+            \u003Cdiv class="menu-item active" onclick="switchSection('dashboard')">
+                \u003Ci class="fas fa-home">\u003C/i>
+                \u003Cspan>Dashboard\u003C/span>
+            \u003C/div>
+            \u003Cdiv class="menu-item" onclick="switchSection('add-product')">
+                \u003Ci class="fas fa-plus-circle">\u003C/i>
+                \u003Cspan>Add Product\u003C/span>
+            \u003C/div>
+            \u003Cdiv class="menu-item" onclick="switchSection('product-management')">
+                \u003Ci class="fas fa-boxes">\u003C/i>
+                \u003Cspan>Product Management\u003C/span>
+            \u003C/div>
+            \u003Cdiv class="menu-item" onclick="switchSection('send-notification')">
+                \u003Ci class="fas fa-bell">\u003C/i>
+                \u003Cspan>Send Notification\u003C/span>
+            \u003C/div>
+            \u003Cdiv class="menu-item" onclick="switchSection('orders')">
+                \u003Ci class="fas fa-shopping-cart">\u003C/i>
+                \u003Cspan>Orders\u003C/span>
+            \u003C/div>
+            \u003Cdiv class="menu-item" onclick="switchSection('settings')">
+                \u003Ci class="fas fa-cog">\u003C/i>
+                \u003Cspan>Settings\u003C/span>
+            \u003C/div>
+            \u003Cdiv class="menu-item" onclick="switchSection('create-promo')">
+                \u003Ci class="fas fa-ticket-alt">\u003C/i>
+                \u003Cspan>Create Promo Code\u003C/span>
+            \u003C/div>
+            \u003Cdiv class="menu-item" onclick="switchSection('bulk-promo')">
+                \u003Ci class="fas fa-layer-group">\u003C/i>
+                \u003Cspan>Bulk Mode\u003C/span>
+            \u003C/div>
+        \u003C/div>
+    \u003C/div>
+
+    \u003C!-- Main Content -->
+    \u003Cdiv class="main-content-wrapper">
+        \u003C!-- Topbar -->
+        \u003Cdiv class="topbar">
+            \u003Cbutton class="menu-toggle" onclick="openSidebar()">
+                \u003Ci class="fas fa-bars">\u003C/i>
+            \u003C/button>
+            \u003Cdiv class="topbar-title">
+                \u003Ci class="fas fa-shield-alt">\u003C/i> InstaVault Admin
+            \u003C/div>
+            \u003Cdiv>\u003C/div>
+        \u003C/div>
+
+        \u003C!-- Main Content -->
+        \u003Cdiv class="main-content">
+            \u003C!-- Dashboard Section -->
+            \u003Cdiv class="content-section active aos-init" id="dashboard" data-aos="fade-up">
+                \u003Ch2 class="mb-4" style="color: white; font-weight: bold;">
+                    \u003Ci class="fas fa-chart-line">\u003C/i> Dashboard Overview
+                \u003C/h2>
+                
+                \u003Cdiv class="stats-grid">
+                    \u003Cdiv class="stat-card aos-init" data-aos="zoom-in" data-aos-delay="100">
+                        \u003Cdiv class="stat-icon">
+                            \u003Ci class="fas fa-box">\u003C/i>
+                        \u003C/div>
+                        \u003Cdiv class="stat-value" id="totalProducts">0\u003C/div>
+                        \u003Cdiv class="stat-label">Total Products\u003C/div>
+                    \u003C/div>
+
+                    \u003Cdiv class="stat-card aos-init" data-aos="zoom-in" data-aos-delay="200">
+                        \u003Cdiv class="stat-icon">
+                            \u003Ci class="fas fa-rupee-sign">\u003C/i>
+                        \u003C/div>
+                        \u003Cdiv class="stat-value" id="totalRevenue">₹0\u003C/div>
+                        \u003Cdiv class="stat-label">Total Revenue\u003C/div>
+                    \u003C/div>
+
+                    \u003Cdiv class="stat-card aos-init" data-aos="zoom-in" data-aos-delay="300">
+                        \u003Cdiv class="stat-icon">
+                            \u003Ci class="fas fa-shopping-bag">\u003C/i>
+                        \u003C/div>
+                        \u003Cdiv class="stat-value" id="totalOrders">0\u003C/div>
+                        \u003Cdiv class="stat-label">Total Orders\u003C/div>
+                    \u003C/div>
+
+                    \u003Cdiv class="stat-card aos-init" data-aos="zoom-in" data-aos-delay="400">
+                        \u003Cdiv class="stat-icon">
+                            \u003Ci class="fas fa-ticket-alt">\u003C/i>
+                        \u003C/div>
+                        \u003Cdiv class="stat-value" id="activePromoCodes">0\u003C/div>
+                        \u003Cdiv class="stat-label">Active Promo Codes\u003C/div>
+                    \u003C/div>
+                \u003C/div>
+
+                \u003Cdiv class="form-card aos-init" data-aos="fade-up" data-aos-delay="500">
+                    \u003Ch3 class="mb-3">\u003Ci class="fas fa-chart-bar">\u003C/i> Recent Activity\u003C/h3>
+                    \u003Cdiv id="recentActivity">
+                        \u003Cp class="text-muted">Loading activity...\u003C/p>
+                    \u003C/div>
+                \u003C/div>
+            \u003C/div>
+
+            \u003C!-- Add Product Section -->
+            \u003Cdiv class="content-section" id="add-product">
+                \u003Cdiv class="form-card aos-init" data-aos="fade-up">
+                    \u003Ch2>\u003Ci class="fas fa-plus-circle">\u003C/i> Add New Product\u003C/h2>
+                    \u003Cform id="addProductForm">
+                        \u003Cdiv class="row">
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Product Title *\u003C/label>
+                                    \u003Cinput type="text" class="form-control" id="productTitle" required="" placeholder="Enter product title">
+                                \u003C/div>
+                            \u003C/div>
+
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Product Type *\u003C/label>
+                                    \u003Cselect class="form-select" id="productType" required="">
+                                        \u003Coption value="">Select Type\u003C/option>
+                                        \u003Coption value="HTML File">HTML File\u003C/option>
+                                        \u003Coption value="Sketchware Project">Sketchware Project\u003C/option>
+                                        \u003Coption value="Android Studio Project">Android Studio Project\u003C/option>
+                                        \u003Coption value="Prompt">Prompt\u003C/option>
+                                        \u003Coption value="XML File">XML File\u003C/option>
+                                    \u003C/select>
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Product Description *\u003C/label>
+                            \u003Ctextarea class="form-control" id="productDescription" rows="4" required="" placeholder="Enter detailed product description">\u003C/textarea>
+                        \u003C/div>
+
+                        \u003Cdiv class="row">
+                            \u003Cdiv class="col-md-4">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Original Price (₹) *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="originalPrice" required="" placeholder="999">
+                                \u003C/div>
+                            \u003C/div>
+
+                            \u003Cdiv class="col-md-4">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Discount Price (₹) *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="discountPrice" required="" placeholder="299">
+                                \u003C/div>
+                            \u003C/div>
+
+                            \u003Cdiv class="col-md-4">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Rating (0-5) *\u003C/label>
+                                    \u003Cinput type="number" step="0.1" min="0" max="5" class="form-control" id="productRating" required="" placeholder="4.8">
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+
+                        \u003Cdiv class="row">
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Total Reviews *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="totalReviews" required="" placeholder="150">
+                                \u003C/div>
+                            \u003C/div>
+
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Product Image URL *\u003C/label>
+                                    \u003Cinput type="text" class="form-control" id="productImage" required="" placeholder="example.com/image.jpg">
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Download Link *\u003C/label>
+                            \u003Cinput type="url" class="form-control" id="downloadLink" required="" placeholder="https://drive.google.com/...">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Demo APK Link (Optional)\u003C/label>
+                            \u003Cinput type="url" class="form-control" id="demoApkLink" placeholder="https://drive.google.com/demo-apk">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Screenshots URLs\u003C/label>
+                            \u003Cdiv id="screenshotsContainer">
+                                \u003Cdiv class="screenshot-item">
+                                    \u003Cinput type="text" class="form-control screenshot-input" placeholder="Screenshot URL 1">
+                                    \u003Cbutton type="button" class="btn-remove-screenshot" onclick="removeScreenshot(this)">
+                                        \u003Ci class="fas fa-trash">\u003C/i>
+                                    \u003C/button>
+                                \u003C/div>
+                            \u003C/div>
+                            \u003Cbutton type="button" class="btn-add-screenshot" onclick="addScreenshot()">
+                                \u003Ci class="fas fa-plus">\u003C/i> Add Screenshot
+                            \u003C/button>
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Cdiv class="form-check">
+                                \u003Cinput class="form-check-input" type="checkbox" id="productStatus" checked="">
+                                \u003Clabel class="form-check-label" for="productStatus">
+                                    Active Status
+                                \u003C/label>
+                            \u003C/div>
+                        \u003C/div>
+
+                        \u003Cbutton type="submit" class="btn btn-gradient">
+                            \u003Ci class="fas fa-plus">\u003C/i> Add Product
+                        \u003C/button>
+                    \u003C/form>
+                \u003C/div>
+            \u003C/div>
+
+            \u003C!-- Product Management Section -->
+            \u003Cdiv class="content-section" id="product-management">
+                \u003Cdiv class="orders-container aos-init" data-aos="fade-up">
+                    \u003Ch2 class="mb-4">\u003Ci class="fas fa-boxes">\u003C/i> Product Management\u003C/h2>
+                    \u003Cdiv class="loading-spinner" id="loadingProducts">
+                        \u003Cdiv class="spinner-border text-primary" role="status">
+                            \u003Cspan class="visually-hidden">Loading...\u003C/span>
+                        \u003C/div>
+                        \u003Cp class="mt-3 text-muted">Loading products...\u003C/p>
+                    \u003C/div>
+                    \u003Cdiv id="productsContainer">\u003C/div>
+                \u003C/div>
+            \u003C/div>
+
+            \u003C!-- Send Notification Section -->
+            \u003Cdiv class="content-section" id="send-notification">
+                \u003Cdiv class="form-card aos-init" data-aos="fade-up">
+                    \u003Ch2>\u003Ci class="fas fa-bell">\u003C/i> Send Push Notification\u003C/h2>
+                    \u003Cform id="notificationForm">
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Notification Title *\u003C/label>
+                            \u003Cinput type="text" class="form-control" id="notifTitle" required="" placeholder="New Product Available!">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Notification Message *\u003C/label>
+                            \u003Ctextarea class="form-control" id="notifMessage" rows="4" required="" placeholder="Check out our latest product...">\u003C/textarea>
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Product ID (Optional)\u003C/label>
+                            \u003Cinput type="text" class="form-control" id="notifProductId" placeholder="Leave empty for general notification">
+                        \u003C/div>
+
+                        \u003Cdiv class="notification-preview">
+                            \u003Ch5>\u003Ci class="fas fa-mobile-alt">\u003C/i> Preview\u003C/h5>
+                            \u003Cp>\u003Cstrong id="previewTitle">Notification Title\u003C/strong>\u003C/p>
+                            \u003Cp id="previewMessage">Notification message will appear here...\u003C/p>
+                        \u003C/div>
+
+                        \u003Cbutton type="submit" class="btn btn-success-gradient mt-3">
+                            \u003Ci class="fas fa-paper-plane">\u003C/i> Send to All Users
+                        \u003C/button>
+                    \u003C/form>
+                \u003C/div>
+            \u003C/div>
+
+            \u003C!-- Orders Section -->
+            \u003Cdiv class="content-section" id="orders">
+                \u003Cdiv class="orders-container aos-init" data-aos="fade-up">
+                    \u003Ch2 class="mb-4">\u003Ci class="fas fa-shopping-cart">\u003C/i> All Orders\u003C/h2>
+                    \u003Cdiv class="loading-spinner" id="loadingOrders">
+                        \u003Cdiv class="spinner-border text-primary" role="status">
+                            \u003Cspan class="visually-hidden">Loading...\u003C/span>
+                        \u003C/div>
+                        \u003Cp class="mt-3 text-muted">Loading orders...\u003C/p>
+                    \u003C/div>
+                    \u003Cdiv id="ordersContainer">\u003C/div>
+                \u003C/div>
+            \u003C/div>
+
+            \u003C!-- Settings Section -->
+            \u003Cdiv class="content-section" id="settings">
+                \u003Cdiv class="form-card aos-init" data-aos="fade-up">
+                    \u003Ch2>\u003Ci class="fas fa-cog">\u003C/i> App Settings\u003C/h2>
+                    \u003Cform id="settingsForm">
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">App Logo URL\u003C/label>
+                            \u003Cinput type="url" class="form-control" id="appLogo" placeholder="https://example.com/logo.png">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">App Title\u003C/label>
+                            \u003Cinput type="text" class="form-control" id="appTitle" placeholder="InstaVault Pro">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">UPI ID\u003C/label>
+                            \u003Cinput type="text" class="form-control" id="upiId" placeholder="9004814981@fam">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Telegram Group Link\u003C/label>
+                            \u003Cinput type="url" class="form-control" id="telegramLink" placeholder="https://t.me/yourgroup">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">YouTube Channel Link\u003C/label>
+                            \u003Cinput type="url" class="form-control" id="youtubeLink" placeholder="https://youtube.com/@yourchannel">
+                        \u003C/div>
+
+                        \u003Cbutton type="submit" class="btn btn-gradient">
+                            \u003Ci class="fas fa-save">\u003C/i> Save Settings
+                        \u003C/button>
+                    \u003C/form>
+                \u003C/div>
+            \u003C/div>
+
+            \u003C!-- Create Promo Code Section -->
+            \u003Cdiv class="content-section" id="create-promo">
+                \u003Cdiv class="form-card aos-init" data-aos="fade-up">
+                    \u003Ch2>\u003Ci class="fas fa-ticket-alt">\u003C/i> Create Promo Code\u003C/h2>
+                    \u003Cform id="promoCodeForm">
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Promo Code (8 Digits) *\u003C/label>
+                            \u003Cdiv class="input-with-button">
+                                \u003Cinput type="text" class="form-control" id="promoCode" required="" maxlength="8" placeholder="SAVE2024">
+                                \u003Cbutton type="button" class="btn-random" onclick="generatePromoCode()">
+                                    \u003Ci class="fas fa-random">\u003C/i> Generate
+                                \u003C/button>
+                            \u003C/div>
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Discount Type *\u003C/label>
+                            \u003Cselect class="form-select" id="discountType" required="" onchange="toggleDiscountFields()">
+                                \u003Coption value="">Select Type\u003C/option>
+                                \u003Coption value="fixed">Fixed Value\u003C/option>
+                                \u003Coption value="percentage">Percentage\u003C/option>
+                            \u003C/select>
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group" id="fixedValueField" style="display: none;">
+                            \u003Clabel class="form-label">Discount Value (₹) *\u003C/label>
+                            \u003Cinput type="number" class="form-control" id="fixedValue" placeholder="50">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group" id="percentageField" style="display: none;">
+                            \u003Clabel class="form-label">Discount Percentage (%) *\u003C/label>
+                            \u003Cinput type="number" class="form-control" id="percentageValue" min="1" max="100" placeholder="20">
+                        \u003C/div>
+
+                        \u003Cdiv class="row">
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Minimum Purchase (₹) *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="minPurchase" required="" placeholder="100">
+                                \u003C/div>
+                            \u003C/div>
+
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Maximum Purchase (₹) *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="maxPurchase" required="" placeholder="5000">
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+
+                        \u003Cdiv class="row">
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Usage Limit *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="usageLimit" required="" placeholder="100">
+                                \u003C/div>
+                            \u003C/div>
+
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Expiry Date *\u003C/label>
+                                    \u003Cinput type="datetime-local" class="form-control" id="expiryTime" required="">
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+
+                        \u003Cbutton type="submit" class="btn btn-gradient">
+                            \u003Ci class="fas fa-save">\u003C/i> Create Promo Code
+                        \u003C/button>
+                    \u003C/form>
+
+                    \u003Chr class="my-4">
+
+                    \u003Ch3 class="mb-3">\u003Ci class="fas fa-list">\u003C/i> Active Promo Codes\u003C/h3>
+                    \u003Cdiv id="promoCodesContainer">
+                        \u003Cp class="text-muted">No active promo codes yet.\u003C/p>
+                    \u003C/div>
+                \u003C/div>
+            \u003C/div>
+
+            \u003C!-- Bulk Promo Mode Section -->
+            \u003Cdiv class="content-section" id="bulk-promo">
+                \u003Cdiv class="form-card aos-init" data-aos="fade-up">
+                    \u003Ch2>\u003Ci class="fas fa-layer-group">\u003C/i> Bulk Mode - Generate Multiple Promo Codes\u003C/h2>
+                    \u003Cform id="bulkPromoForm">
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Number of Promo Codes *\u003C/label>
+                            \u003Cinput type="number" class="form-control" id="bulkPromoCount" required="" min="1" max="100" placeholder="10">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Discount Type *\u003C/label>
+                            \u003Cselect class="form-select" id="bulkDiscountType" required="" onchange="toggleBulkDiscountFields()">
+                                \u003Coption value="">Select Type\u003C/option>
+                                \u003Coption value="fixed">Fixed Value\u003C/option>
+                                \u003Coption value="percentage">Percentage\u003C/option>
+                            \u003C/select>
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group" id="bulkFixedValueField" style="display: none;">
+                            \u003Clabel class="form-label">Discount Value (₹) *\u003C/label>
+                            \u003Cinput type="number" class="form-control" id="bulkFixedValue" placeholder="50">
+                        \u003C/div>
+
+                        \u003Cdiv class="form-group" id="bulkPercentageField" style="display: none;">
+                            \u003Clabel class="form-label">Discount Percentage (%) *\u003C/label>
+                            \u003Cinput type="number" class="form-control" id="bulkPercentageValue" min="1" max="100" placeholder="20">
+                        \u003C/div>
+
+                        \u003Cdiv class="row">
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Minimum Purchase (₹) *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="bulkMinPurchase" required="" placeholder="100">
+                                \u003C/div>
+                            \u003C/div>
+
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Maximum Purchase (₹) *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="bulkMaxPurchase" required="" placeholder="5000">
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+
+                        \u003Cdiv class="row">
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Usage Limit (Per Code) *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="bulkUsageLimit" required="" placeholder="10">
+                                \u003C/div>
+                            \u003C/div>
+
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Expiry Date *\u003C/label>
+                                    \u003Cinput type="datetime-local" class="form-control" id="bulkExpiryTime" required="">
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+
+                        \u003Cbutton type="submit" class="btn btn-gradient">
+                            \u003Ci class="fas fa-magic">\u003C/i> Generate Promo Codes
+                        \u003C/button>
+                    \u003C/form>
+
+                    \u003Cdiv id="bulkPromoResultsContainer" style="display: none; margin-top: 30px;">
+                        \u003Ch3 class="mb-3">\u003Ci class="fas fa-check-circle" style="color: #38ef7d;">\u003C/i> Generated Promo Codes\u003C/h3>
+                        \u003Cdiv id="bulkPromoResults">\u003C/div>
+                    \u003C/div>
+                \u003C/div>
+            \u003C/div>
+        \u003C/div>
+    \u003C/div>
+
+    \u003C!-- Edit Product Modal -->
+    \u003Cdiv class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+        \u003Cdiv class="modal-dialog modal-lg">
+            \u003Cdiv class="modal-content">
+                \u003Cdiv class="modal-header">
+                    \u003Ch5 class="modal-title">\u003Ci class="fas fa-edit">\u003C/i> Edit Product\u003C/h5>
+                    \u003Cbutton type="button" class="btn-close" data-bs-dismiss="modal">\u003C/button>
+                \u003C/div>
+                \u003Cdiv class="modal-body">
+                    \u003Cform id="editProductForm">
+                        \u003Cinput type="hidden" id="editProductId">
+                        \u003Cdiv class="row">
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Product Title *\u003C/label>
+                                    \u003Cinput type="text" class="form-control" id="editProductTitle" required="">
+                                \u003C/div>
+                            \u003C/div>
+                            \u003Cdiv class="col-md-6">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Product Type *\u003C/label>
+                                    \u003Cselect class="form-select" id="editProductType" required="">
+                                        \u003Coption value="HTML File">HTML File\u003C/option>
+                                        \u003Coption value="Sketchware Project">Sketchware Project\u003C/option>
+                                        \u003Coption value="Android Studio Project">Android Studio Project\u003C/option>
+                                        \u003Coption value="Prompt">Prompt\u003C/option>
+                                        \u003Coption value="XML File">XML File\u003C/option>
+                                    \u003C/select>
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Description *\u003C/label>
+                            \u003Ctextarea class="form-control" id="editProductDescription" rows="3" required="">\u003C/textarea>
+                        \u003C/div>
+                        \u003Cdiv class="row">
+                            \u003Cdiv class="col-md-4">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Original Price (₹) *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="editOriginalPrice" required="">
+                                \u003C/div>
+                            \u003C/div>
+                            \u003Cdiv class="col-md-4">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Discount Price (₹) *\u003C/label>
+                                    \u003Cinput type="number" class="form-control" id="editDiscountPrice" required="">
+                                \u003C/div>
+                            \u003C/div>
+                            \u003Cdiv class="col-md-4">
+                                \u003Cdiv class="form-group">
+                                    \u003Clabel class="form-label">Rating *\u003C/label>
+                                    \u003Cinput type="number" step="0.1" min="0" max="5" class="form-control" id="editProductRating" required="">
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Product Image URL *\u003C/label>
+                            \u003Cinput type="text" class="form-control" id="editProductImage" required="">
+                        \u003C/div>
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Download Link *\u003C/label>
+                            \u003Cinput type="url" class="form-control" id="editDownloadLink" required="">
+                        \u003C/div>
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Demo APK Link\u003C/label>
+                            \u003Cinput type="url" class="form-control" id="editDemoApkLink">
+                        \u003C/div>
+                        \u003Cdiv class="form-group">
+                            \u003Cdiv class="form-check">
+                                \u003Cinput class="form-check-input" type="checkbox" id="editProductStatus">
+                                \u003Clabel class="form-check-label" for="editProductStatus">
+                                    Active Status
+                                \u003C/label>
+                            \u003C/div>
+                        \u003C/div>
+                        \u003Cbutton type="submit" class="btn btn-success-gradient">
+                            \u003Ci class="fas fa-save">\u003C/i> Save Changes
+                        \u003C/button>
+                    \u003C/form>
+                \u003C/div>
+            \u003C/div>
+        \u003C/div>
+    \u003C/div>
+
+    \u003C!-- Edit Promo Modal -->
+    \u003Cdiv class="modal fade" id="editPromoModal" tabindex="-1" aria-hidden="true">
+        \u003Cdiv class="modal-dialog">
+            \u003Cdiv class="modal-content">
+                \u003Cdiv class="modal-header">
+                    \u003Ch5 class="modal-title">\u003Ci class="fas fa-edit">\u003C/i> Edit Promo Code\u003C/h5>
+                    \u003Cbutton type="button" class="btn-close" data-bs-dismiss="modal">\u003C/button>
+                \u003C/div>
+                \u003Cdiv class="modal-body">
+                    \u003Cform id="editPromoForm">
+                        \u003Cinput type="hidden" id="editPromoCode">
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Promo Code\u003C/label>
+                            \u003Cinput type="text" class="form-control" id="editPromoCodeDisplay" readonly="">
+                        \u003C/div>
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Discount Type *\u003C/label>
+                            \u003Cselect class="form-select" id="editPromoDiscountType" required="" onchange="toggleEditPromoFields()">
+                                \u003Coption value="fixed">Fixed Value\u003C/option>
+                                \u003Coption value="percentage">Percentage\u003C/option>
+                            \u003C/select>
+                        \u003C/div>
+                        \u003Cdiv class="form-group" id="editPromoFixedField">
+                            \u003Clabel class="form-label">Discount Value (₹) *\u003C/label>
+                            \u003Cinput type="number" class="form-control" id="editPromoFixedValue">
+                        \u003C/div>
+                        \u003Cdiv class="form-group" id="editPromoPercentageField" style="display: none;">
+                            \u003Clabel class="form-label">Discount Percentage (%) *\u003C/label>
+                            \u003Cinput type="number" class="form-control" id="editPromoPercentageValue" min="1" max="100">
+                        \u003C/div>
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Minimum Purchase (₹) *\u003C/label>
+                            \u003Cinput type="number" class="form-control" id="editPromoMinPurchase" required="">
+                        \u003C/div>
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Usage Limit *\u003C/label>
+                            \u003Cinput type="number" class="form-control" id="editPromoUsageLimit" required="">
+                        \u003C/div>
+                        \u003Cdiv class="form-group">
+                            \u003Clabel class="form-label">Expiry Date *\u003C/label>
+                            \u003Cinput type="datetime-local" class="form-control" id="editPromoExpiryTime" required="">
+                        \u003C/div>
+                        \u003Cbutton type="submit" class="btn btn-success-gradient">
+                            \u003Ci class="fas fa-save">\u003C/i> Save Changes
+                        \u003C/button>
+                    \u003C/form>
+                \u003C/div>
+            \u003C/div>
+        \u003C/div>
+    \u003C/div>
+
+    \u003C!-- Alert Container -->
+    \u003Cdiv id="alertContainer">\u003C/div>
+
+    \u003C!-- Scripts -->
+    \u003Cscript src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">\u003C/script>
+    \u003Cscript src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js">\u003C/script>
+    \u003Cscript type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+  apiKey: "AIzaSyCNaAc3i4UOK57CJaeT96coTlKxfC-7kgk",
+  authDomain: "dark-devil-bhai.firebaseapp.com",
+  databaseURL: "https://dark-devil-bhai-default-rtdb.firebaseio.com",
+  projectId: "dark-devil-bhai",
+  storageBucket: "dark-devil-bhai.firebasestorage.app",
+  messagingSenderId: "599566539258",
+  appId: "1:599566539258:web:470f32fa0489ff3257ec43",
+  measurementId: "G-8Y7HFZ2GSE"
+};
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // Sidebar Functions
+        window.openSidebar = function() {
+            document.getElementById('sidebar').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        };
+
+        window.closeSidebar = function() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        };
+
+        // Switch Section
+        window.switchSection = function(sectionName) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            document.getElementById(sectionName).classList.add('active');
+            event.target.closest('.menu-item').classList.add('active');
+            closeSidebar();
+
+            if (sectionName === 'dashboard') loadDashboard();
+            if (sectionName === 'orders') loadOrders();
+            if (sectionName === 'settings') loadSettings();
+            if (sectionName === 'create-promo') loadPromoCodes();
+            if (sectionName === 'product-management') loadProducts();
+        };
+
+        // Show Alert
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+            
+            const alertHtml = `
+                \u003Cdiv class="alert alert-${type} alert-dismissible fade show alert-custom" id="${alertId}" role="alert">
+                    \u003Ci class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}">\u003C/i>
+                    ${message}
+                    \u003Cbutton type="button" class="btn-close" onclick="document.getElementById('${alertId}').remove()">\u003C/button>
+                \u003C/div>
+            `;
+            
+            alertContainer.innerHTML = alertHtml;
+            
+            setTimeout(() => {
+                const alertElement = document.getElementById(alertId);
+                if (alertElement) alertElement.remove();
+            }, 5000);
+        }
+
+        // Load Dashboard
+        async function loadDashboard() {
+            try {
+                const productsRef = ref(database, 'products');
+                const productsSnapshot = await get(productsRef);
+                const products = productsSnapshot.val();
+                const totalProducts = products ? Object.keys(products).length : 0;
+                document.getElementById('totalProducts').textContent = totalProducts;
+
+                const ordersRef = ref(database, 'orders');
+                const ordersSnapshot = await get(ordersRef);
+                const orders = ordersSnapshot.val();
+                
+                let totalOrders = 0;
+                let totalRevenue = 0;
+                
+                if (orders) {
+                    totalOrders = Object.keys(orders).length;
+                    Object.values(orders).forEach(order => {
+                        totalRevenue += parseFloat(order.amount) || 0;
+                    });
+                }
+                
+                document.getElementById('totalOrders').textContent = totalOrders;
+                document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toFixed(2);
+
+                const promoRef = ref(database, 'promo_codes');
+                const promoSnapshot = await get(promoRef);
+                const promoCodes = promoSnapshot.val();
+                
+                let activePromos = 0;
+                if (promoCodes) {
+                    Object.values(promoCodes).forEach(promo => {
+                        if (new Date(promo.expiry_time) > new Date()) {
+                            activePromos++;
+                        }
+                    });
+                }
+                
+                document.getElementById('activePromoCodes').textContent = activePromos;
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Add Product Form
+        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const screenshots = Array.from(document.querySelectorAll('.screenshot-input'))
+                    .map(input => input.value.trim())
+                    .filter(url => url !== '')
+                    .map(url => url.startsWith('http') ? url : 'https://' + url);
+
+                let imageUrl = document.getElementById('productImage').value.trim();
+                if (!imageUrl.startsWith('http')) {
+                    imageUrl = 'https://' + imageUrl;
+                }
+
+                const demoApkValue = document.getElementById('demoApkLink').value.trim();
+                let demoApk = demoApkValue ? (demoApkValue.startsWith('http') ? demoApkValue : 'https://' + demoApkValue) : '';
+
+                const productId = 'product_' + Date.now();
+                
+                const product = {
+                    id: productId,
+                    title: document.getElementById('productTitle').value,
+                    description: document.getElementById('productDescription').value,
+                    original_price: document.getElementById('originalPrice').value,
+                    price: document.getElementById('discountPrice').value,
+                    rating: document.getElementById('productRating').value,
+                    image: imageUrl,
+                    category: document.getElementById('productType').value,
+                    download_link: document.getElementById('downloadLink').value,
+                    demoApk: demoApk,
+                    screenshots: screenshots,
+                    is_active: document.getElementById('productStatus').checked
+                };
+
+                const productRef = ref(database, `products/${product.id}`);
+                await set(productRef, product);
+
+                showAlert('✅ Product added successfully!', 'success');
+                document.getElementById('addProductForm').reset();
+                
+                document.getElementById('screenshotsContainer').innerHTML = `
+                    \u003Cdiv class="screenshot-item">
+                        \u003Cinput type="text" class="form-control screenshot-input" placeholder="Screenshot URL 1">
+                        \u003Cbutton type="button" class="btn-remove-screenshot" onclick="removeScreenshot(this)">
+                            \u003Ci class="fas fa-trash">\u003C/i>
+                        \u003C/button>
+                    \u003C/div>
+                `;
+
+            } catch (error) {
+                showAlert('❌ Error: ' + error.message, 'danger');
+            }
+        });
+
+        // Load Products
+        async function loadProducts() {
+            document.getElementById('loadingProducts').style.display = 'block';
+            const productsRef = ref(database, 'products');
+
+            onValue(productsRef, (snapshot) => {
+                const products = snapshot.val();
+                const container = document.getElementById('productsContainer');
+                container.innerHTML = '';
+
+                if (products) {
+                    Object.entries(products).reverse().forEach(([id, product]) => {
+                        const productCard = document.createElement('div');
+                        productCard.className = 'product-card';
+                        productCard.innerHTML = `
+                            \u003Cimg src="${product.image}" alt="${product.title}" class="product-image" onerror="this.src='https://via.placeholder.com/120'">
+                            \u003Cdiv class="product-info">
+                                \u003Cdiv class="product-title">${product.title}\u003C/div>
+                                \u003Cdiv class="product-price">
+                                    ₹${product.price}
+                                    \u003Cspan class="product-original-price">₹${product.original_price}\u003C/span>
+                                \u003C/div>
+                                \u003Cdiv style="margin: 10px 0; color: #718096;">
+                                    \u003Ci class="fas fa-star" style="color: #fbbf24;">\u003C/i> ${product.rating} | 
+                                    \u003Ci class="fas fa-tag">\u003C/i> ${product.category}
+                                \u003C/div>
+                                \u003Cdiv style="font-size: 14px; color: #4a5568; margin-bottom: 10px;">
+                                    ${product.description.substring(0, 100)}...
+                                \u003C/div>
+                                ${product.demoApk ? '\u003Cdiv style="font-size: 12px; color: #667eea;">\u003Ci class="fas fa-download">\u003C/i> Demo APK Available\u003C/div>' : ''}
+                            \u003C/div>
+                            \u003Cdiv class="product-actions">
+                                \u003Cbutton class="btn-edit" onclick="editProduct('${id}')">
+                                    \u003Ci class="fas fa-edit">\u003C/i> Edit
+                                \u003C/button>
+                                \u003Cbutton class="btn-delete" onclick="deleteProduct('${id}')">
+                                    \u003Ci class="fas fa-trash">\u003C/i> Delete
+                                \u003C/button>
+                            \u003C/div>
+                        `;
+                        container.appendChild(productCard);
+                    });
+                } else {
+                    container.innerHTML = '\u003Cp class="text-muted text-center">No products yet.\u003C/p>';
+                }
+
+                document.getElementById('loadingProducts').style.display = 'none';
+            });
+        }
+
+        // Edit Product
+        window.editProduct = async function(productId) {
+            try {
+                const productRef = ref(database, `products/${productId}`);
+                const snapshot = await get(productRef);
+                const product = snapshot.val();
+
+                if (product) {
+                    document.getElementById('editProductId').value = productId;
+                    document.getElementById('editProductTitle').value = product.title;
+                    document.getElementById('editProductType').value = product.category;
+                    document.getElementById('editProductDescription').value = product.description;
+                    document.getElementById('editOriginalPrice').value = product.original_price;
+                    document.getElementById('editDiscountPrice').value = product.price;
+                    document.getElementById('editProductRating').value = product.rating;
+                    document.getElementById('editProductImage').value = product.image;
+                    document.getElementById('editDownloadLink').value = product.download_link;
+                    document.getElementById('editDemoApkLink').value = product.demoApk || '';
+                    document.getElementById('editProductStatus').checked = product.is_active;
+
+                    const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+                    modal.show();
+                }
+            } catch (error) {
+                showAlert('❌ Error loading product: ' + error.message, 'danger');
+            }
+        };
+
+        // Save Edited Product
+        document.getElementById('editProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const productId = document.getElementById('editProductId').value;
+                
+                let imageUrl = document.getElementById('editProductImage').value.trim();
+                if (!imageUrl.startsWith('http')) {
+                    imageUrl = 'https://' + imageUrl;
+                }
+
+                const demoApkValue = document.getElementById('editDemoApkLink').value.trim();
+                let demoApk = demoApkValue ? (demoApkValue.startsWith('http') ? demoApkValue : 'https://' + demoApkValue) : '';
+
+                const productRef = ref(database, `products/${productId}`);
+                const snapshot = await get(productRef);
+                const existingProduct = snapshot.val();
+
+                const updatedProduct = {
+                    ...existingProduct,
+                    title: document.getElementById('editProductTitle').value,
+                    category: document.getElementById('editProductType').value,
+                    description: document.getElementById('editProductDescription').value,
+                    original_price: document.getElementById('editOriginalPrice').value,
+                    price: document.getElementById('editDiscountPrice').value,
+                    rating: document.getElementById('editProductRating').value,
+                    image: imageUrl,
+                    download_link: document.getElementById('editDownloadLink').value,
+                    demoApk: demoApk,
+                    is_active: document.getElementById('editProductStatus').checked
+                };
+
+                await set(productRef, updatedProduct);
+
+                showAlert('✅ Product updated successfully!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
+                loadProducts();
+
+            } catch (error) {
+                showAlert('❌ Error: ' + error.message, 'danger');
+            }
+        });
+
+        // Delete Product
+        window.deleteProduct = async function(productId) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                try {
+                    const productRef = ref(database, `products/${productId}`);
+                    await remove(productRef);
+                    showAlert('✅ Product deleted successfully!', 'success');
+                    loadProducts();
+                } catch (error) {
+                    showAlert('❌ Error: ' + error.message, 'danger');
+                }
+            }
+        };
+
+        // Add Screenshot
+        window.addScreenshot = function() {
+            const container = document.getElementById('screenshotsContainer');
+            const count = container.children.length + 1;
+            
+            const screenshotItem = document.createElement('div');
+            screenshotItem.className = 'screenshot-item';
+            screenshotItem.innerHTML = `
+                \u003Cinput type="text" class="form-control screenshot-input" placeholder="Screenshot URL ${count}">
+                \u003Cbutton type="button" class="btn-remove-screenshot" onclick="removeScreenshot(this)">
+                    \u003Ci class="fas fa-trash">\u003C/i>
+                \u003C/button>
+            `;
+            
+            container.appendChild(screenshotItem);
+        };
+
+        // Remove Screenshot
+        window.removeScreenshot = function(button) {
+            const container = document.getElementById('screenshotsContainer');
+            if (container.children.length > 1) {
+                button.closest('.screenshot-item').remove();
+            } else {
+                showAlert('⚠️ At least one screenshot field is required!', 'warning');
+            }
+        };
+
+        // Send Notification Form
+        document.getElementById('notificationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const notification = {
+                    title: document.getElementById('notifTitle').value,
+                    message: document.getElementById('notifMessage').value,
+                    product_id: document.getElementById('notifProductId').value || null,
+                    timestamp: Date.now()
+                };
+
+                const notifRef = ref(database, `notifications/${Date.now()}`);
+                await set(notifRef, notification);
+
+                showAlert('✅ Notification sent to all users!', 'success');
+                document.getElementById('notificationForm').reset();
+                document.getElementById('previewTitle').textContent = 'Notification Title';
+                document.getElementById('previewMessage').textContent = 'Notification message will appear here...';
+
+            } catch (error) {
+                showAlert('❌ Error: ' + error.message, 'danger');
+            }
+        });
+
+        // Notification Preview
+        document.getElementById('notifTitle').addEventListener('input', (e) => {
+            document.getElementById('previewTitle').textContent = e.target.value || 'Notification Title';
+        });
+
+        document.getElementById('notifMessage').addEventListener('input', (e) => {
+            document.getElementById('previewMessage').textContent = e.target.value || 'Notification message will appear here...';
+        });
+
+        // Load Orders
+        async function loadOrders() {
+            document.getElementById('loadingOrders').style.display = 'block';
+            const ordersRef = ref(database, 'orders');
+
+            onValue(ordersRef, (snapshot) => {
+                const orders = snapshot.val();
+                const container = document.getElementById('ordersContainer');
+                container.innerHTML = '';
+
+                if (orders) {
+                    Object.entries(orders).reverse().forEach(([id, order]) => {
+                        const orderCard = document.createElement('div');
+                        orderCard.className = 'order-card';
+                        orderCard.innerHTML = `
+                            \u003Ch5>\u003Ci class="fas fa-receipt">\u003C/i> Order #${order.order_id || id}\u003C/h5>
+                            \u003Cdiv class="order-detail">
+                                \u003Cspan class="order-detail-label">Transaction ID:\u003C/span>
+                                \u003Cspan class="order-detail-value">${order.txn_id || order.transaction_id || 'N/A'}\u003C/span>
+                            \u003C/div>
+                            \u003Cdiv class="order-detail">
+                                \u003Cspan class="order-detail-label">UTR ID:\u003C/span>
+                                \u003Cspan class="order-detail-value">${order.utr_id || order.utr || 'N/A'}\u003C/span>
+                            \u003C/div>
+                            \u003Cdiv class="order-detail">
+                                \u003Cspan class="order-detail-label">Amount:\u003C/span>
+                                \u003Cspan class="order-detail-value" style="font-weight: bold; color: #38ef7d;">₹${order.amount}\u003C/span>
+                            \u003C/div>
+                            \u003Cdiv class="order-detail">
+                                \u003Cspan class="order-detail-label">Product ID:\u003C/span>
+                                \u003Cspan class="order-detail-value">${order.product_id}\u003C/span>
+                            \u003C/div>
+                            \u003Cdiv class="order-detail">
+                                \u003Cspan class="order-detail-label">Order ID:\u003C/span>
+                                \u003Cspan class="order-detail-value">${order.order_id || id}\u003C/span>
+                            \u003C/div>
+                            ${order.promo_code ? `
+                            \u003Cdiv class="order-detail">
+                                \u003Cspan class="order-detail-label">Promo Code Used:\u003C/span>
+                                \u003Cspan class="order-detail-value" style="color: #667eea; font-weight: bold;">${order.promo_code}\u003C/span>
+                            \u003C/div>
+                            ` : ''}
+                            \u003Cdiv class="order-detail">
+                                \u003Cspan class="order-detail-label">Time:\u003C/span>
+                                \u003Cspan class="order-detail-value">${new Date(order.timestamp).toLocaleString()}\u003C/span>
+                            \u003C/div>
+                        `;
+                        container.appendChild(orderCard);
+                    });
+                } else {
+                    container.innerHTML = '\u003Cp class="text-muted text-center">No orders yet.\u003C/p>';
+                }
+
+                document.getElementById('loadingOrders').style.display = 'none';
+            });
+        }
+
+        // Load Settings
+        async function loadSettings() {
+            try {
+                const settingsRef = ref(database, 'app_settings');
+                const snapshot = await get(settingsRef);
+                const settings = snapshot.val();
+
+                if (settings) {
+                    document.getElementById('appLogo').value = settings.app_logo || '';
+                    document.getElementById('appTitle').value = settings.app_title || '';
+                    document.getElementById('upiId').value = settings.upi_id || '';
+                    document.getElementById('telegramLink').value = settings.telegram_link || '';
+                    document.getElementById('youtubeLink').value = settings.youtube_link || '';
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Save Settings Form
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const settings = {
+                    app_logo: document.getElementById('appLogo').value,
+                    app_title: document.getElementById('appTitle').value,
+                    upi_id: document.getElementById('upiId').value,
+                    telegram_link: document.getElementById('telegramLink').value,
+                    youtube_link: document.getElementById('youtubeLink').value
+                };
+
+                const settingsRef = ref(database, 'app_settings');
+                await set(settingsRef, settings);
+
+                showAlert('✅ Settings saved successfully!', 'success');
+
+            } catch (error) {
+                showAlert('❌ Error: ' + error.message, 'danger');
+            }
+        });
+
+        // Generate Random Promo Code
+        window.generatePromoCode = function() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i \u003C 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('promoCode').value = code;
+        };
+
+        // Toggle Discount Fields
+        window.toggleDiscountFields = function() {
+            const discountType = document.getElementById('discountType').value;
+            const fixedField = document.getElementById('fixedValueField');
+            const percentageField = document.getElementById('percentageField');
+
+            if (discountType === 'fixed') {
+                fixedField.style.display = 'block';
+                percentageField.style.display = 'none';
+                document.getElementById('fixedValue').required = true;
+                document.getElementById('percentageValue').required = false;
+            } else if (discountType === 'percentage') {
+                fixedField.style.display = 'none';
+                percentageField.style.display = 'block';
+                document.getElementById('fixedValue').required = false;
+                document.getElementById('percentageValue').required = true;
+            } else {
+                fixedField.style.display = 'none';
+                percentageField.style.display = 'none';
+            }
+        };
+
+        // Toggle Bulk Discount Fields
+        window.toggleBulkDiscountFields = function() {
+            const discountType = document.getElementById('bulkDiscountType').value;
+            const fixedField = document.getElementById('bulkFixedValueField');
+            const percentageField = document.getElementById('bulkPercentageField');
+
+            if (discountType === 'fixed') {
+                fixedField.style.display = 'block';
+                percentageField.style.display = 'none';
+                document.getElementById('bulkFixedValue').required = true;
+                document.getElementById('bulkPercentageValue').required = false;
+            } else if (discountType === 'percentage') {
+                fixedField.style.display = 'none';
+                percentageField.style.display = 'block';
+                document.getElementById('bulkFixedValue').required = false;
+                document.getElementById('bulkPercentageValue').required = true;
+            } else {
+                fixedField.style.display = 'none';
+                percentageField.style.display = 'none';
+            }
+        };
+
+        // Create Promo Code Form
+        document.getElementById('promoCodeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const discountType = document.getElementById('discountType').value;
+                const promoCode = document.getElementById('promoCode').value.toUpperCase();
+                const expiryDateTime = document.getElementById('expiryTime').value;
+                
+                const expiryTimestamp = new Date(expiryDateTime).getTime();
+                
+                const discountValue = discountType === 'fixed' 
+                    ? document.getElementById('fixedValue').value 
+                    : document.getElementById('percentageValue').value;
+
+                const promo = {
+                    code: promoCode,
+                    discount_type: discountType,
+                    discount_percent: String(discountValue),
+                    is_active: true,
+                    expiry_date: String(expiryTimestamp),
+                    max_uses: String(document.getElementById('usageLimit').value),
+                    current_uses: "0",
+                    min_purchase: String(document.getElementById('minPurchase').value)
+                };
+
+                const promoRef = ref(database, `promo_codes/${promoCode}`);
+                await set(promoRef, promo);
+
+                const displayValue = discountType === 'fixed' ? `₹${discountValue}` : `${discountValue}%`;
+                showAlert(`✅ Promo code created! (${displayValue} discount)`, 'success');
+                document.getElementById('promoCodeForm').reset();
+                document.getElementById('fixedValueField').style.display = 'none';
+                document.getElementById('percentageField').style.display = 'none';
+                
+                loadPromoCodes();
+
+            } catch (error) {
+                showAlert('❌ Error: ' + error.message, 'danger');
+            }
+        });
+
+        // Bulk Promo Form
+        document.getElementById('bulkPromoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const count = parseInt(document.getElementById('bulkPromoCount').value);
+                const discountType = document.getElementById('bulkDiscountType').value;
+                const expiryDateTime = document.getElementById('bulkExpiryTime').value;
+                const expiryTimestamp = new Date(expiryDateTime).getTime();
+                
+                const discountValue = discountType === 'fixed' 
+                    ? document.getElementById('bulkFixedValue').value 
+                    : document.getElementById('bulkPercentageValue').value;
+
+                const minPurchase = document.getElementById('bulkMinPurchase').value;
+                const maxPurchase = document.getElementById('bulkMaxPurchase').value;
+                const usageLimit = document.getElementById('bulkUsageLimit').value;
+
+                const generatedCodes = [];
+
+                for (let i = 0; i \u003C count; i++) {
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let code = '';
+                    for (let j = 0; j \u003C 8; j++) {
+                        code += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+
+                    const promo = {
+                        code: code,
+                        discount_type: discountType,
+                        discount_percent: String(discountValue),
+                        is_active: true,
+                        expiry_date: String(expiryTimestamp),
+                        max_uses: String(usageLimit),
+                        current_uses: "0",
+                        min_purchase: String(minPurchase)
+                    };
+
+                    const promoRef = ref(database, `promo_codes/${code}`);
+                    await set(promoRef, promo);
+                    generatedCodes.push(code);
+                }
+
+                const displayValue = discountType === 'fixed' ? `₹${discountValue}` : `${discountValue}%`;
+                
+                const resultsContainer = document.getElementById('bulkPromoResults');
+                resultsContainer.innerHTML = generatedCodes.map(code => `
+                    \u003Cdiv class="promo-card">
+                        \u003Cdiv>
+                            \u003Cdiv class="promo-code-display">${code}\u003C/div>
+                            \u003Cdiv style="font-size: 14px; margin-top: 5px;">${displayValue} OFF\u003C/div>
+                        \u003C/div>
+                        \u003Cdiv class="promo-actions">
+                            \u003Cbutton class="btn-promo-action btn-promo-copy" onclick="copyPromoCode('${code}')">
+                                \u003Ci class="fas fa-copy">\u003C/i> Copy
+                            \u003C/button>
+                        \u003C/div>
+                    \u003C/div>
+                `).join('');
+
+                document.getElementById('bulkPromoResultsContainer').style.display = 'block';
+                showAlert(`✅ ${count} promo codes generated successfully!`, 'success');
+                document.getElementById('bulkPromoForm').reset();
+                document.getElementById('bulkFixedValueField').style.display = 'none';
+                document.getElementById('bulkPercentageField').style.display = 'none';
+
+            } catch (error) {
+                showAlert('❌ Error: ' + error.message, 'danger');
+            }
+        });
+
+        // Load Promo Codes
+        async function loadPromoCodes() {
+            try {
+                const promoRef = ref(database, 'promo_codes');
+                const snapshot = await get(promoRef);
+                const promoCodes = snapshot.val();
+                const container = document.getElementById('promoCodesContainer');
+                
+                container.innerHTML = '';
+
+                if (promoCodes) {
+                    Object.entries(promoCodes).forEach(([code, promo]) => {
+                        const expiryTimestamp = parseInt(promo.expiry_date || "0");
+                        const isExpired = expiryTimestamp \u003C Date.now();
+                        const isActive = promo.is_active !== false;
+                        
+                        const promoCard = document.createElement('div');
+                        promoCard.className = 'promo-card';
+                        promoCard.style.opacity = (isExpired || !isActive) ? '0.5' : '1';
+                        
+                        promoCard.innerHTML = `
+                            \u003Cdiv>
+                                \u003Cdiv class="promo-code-display">${code}\u003C/div>
+                                \u003Cdiv style="font-size: 14px; margin-top: 5px;">
+                                    ${promo.discount_type === 'fixed' 
+                                        ? `₹${promo.discount_percent} OFF` 
+                                        : `${promo.discount_percent}% OFF`}
+                                \u003C/div>
+                                \u003Cdiv style="font-size: 12px; margin-top: 5px; opacity: 0.9;">
+                                    Used: ${promo.current_uses || 0}/${promo.max_uses} | 
+                                    Min Purchase: ₹${promo.min_purchase}
+                                \u003C/div>
+                                \u003Cdiv style="font-size: 12px; margin-top: 3px; opacity: 0.9;">
+                                    Expires: ${new Date(expiryTimestamp).toLocaleString()}
+                                \u003C/div>
+                                ${isExpired ? '\u003Cdiv style="color: #ff6b6b; font-weight: bold; margin-top: 5px;">EXPIRED\u003C/div>' : ''}
+                                ${!isActive ? '\u003Cdiv style="color: #ff6b6b; font-weight: bold; margin-top: 5px;">DEACTIVATED\u003C/div>' : ''}
+                            \u003C/div>
+                            \u003Cdiv class="promo-actions">
+                                \u003Cbutton class="btn-promo-action btn-promo-edit" onclick="editPromo('${code}')">
+                                    \u003Ci class="fas fa-edit">\u003C/i> Edit
+                                \u003C/button>
+                                \u003Cbutton class="btn-promo-action btn-promo-copy" onclick="copyPromoCode('${code}')">
+                                    \u003Ci class="fas fa-copy">\u003C/i> Copy
+                                \u003C/button>
+                                \u003Cbutton class="btn-promo-action btn-promo-share" onclick="sharePromoCode('${code}')">
+                                    \u003Ci class="fas fa-share">\u003C/i> Share
+                                \u003C/button>
+                                \u003Cbutton class="btn-promo-action btn-promo-delete" onclick="deletePromoCode('${code}')">
+                                    \u003Ci class="fas fa-trash">\u003C/i> Delete
+                                \u003C/button>
+                            \u003C/div>
+                        `;
+                        
+                        container.appendChild(promoCard);
+                    });
+                } else {
+                    container.innerHTML = '\u003Cp class="text-muted">No promo codes yet.\u003C/p>';
+                }
+
+            } catch (error) {
+                console.error('Error loading promo codes:', error);
+            }
+        }
+
+        // Edit Promo
+        window.editPromo = async function(code) {
+            try {
+                const promoRef = ref(database, `promo_codes/${code}`);
+                const snapshot = await get(promoRef);
+                const promo = snapshot.val();
+
+                if (promo) {
+                    document.getElementById('editPromoCode').value = code;
+                    document.getElementById('editPromoCodeDisplay').value = code;
+                    document.getElementById('editPromoDiscountType').value = promo.discount_type;
+                    
+                    if (promo.discount_type === 'fixed') {
+                        document.getElementById('editPromoFixedField').style.display = 'block';
+                        document.getElementById('editPromoPercentageField').style.display = 'none';
+                        document.getElementById('editPromoFixedValue').value = promo.discount_percent;
+                    } else {
+                        document.getElementById('editPromoFixedField').style.display = 'none';
+                        document.getElementById('editPromoPercentageField').style.display = 'block';
+                        document.getElementById('editPromoPercentageValue').value = promo.discount_percent;
+                    }
+
+                    document.getElementById('editPromoMinPurchase').value = promo.min_purchase;
+                    document.getElementById('editPromoUsageLimit').value = promo.max_uses;
+                    
+                    const expiryDate = new Date(parseInt(promo.expiry_date));
+                    const localDateTime = new Date(expiryDate.getTime() - (expiryDate.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+                    document.getElementById('editPromoExpiryTime').value = localDateTime;
+
+                    const modal = new bootstrap.Modal(document.getElementById('editPromoModal'));
+                    modal.show();
+                }
+            } catch (error) {
+                showAlert('❌ Error loading promo: ' + error.message, 'danger');
+            }
+        };
+
+        // Toggle Edit Promo Fields
+        window.toggleEditPromoFields = function() {
+            const discountType = document.getElementById('editPromoDiscountType').value;
+            const fixedField = document.getElementById('editPromoFixedField');
+            const percentageField = document.getElementById('editPromoPercentageField');
+
+            if (discountType === 'fixed') {
+                fixedField.style.display = 'block';
+                percentageField.style.display = 'none';
+            } else {
+                fixedField.style.display = 'none';
+                percentageField.style.display = 'block';
+            }
+        };
+
+        // Save Edited Promo
+        document.getElementById('editPromoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const code = document.getElementById('editPromoCode').value;
+                const discountType = document.getElementById('editPromoDiscountType').value;
+                const expiryDateTime = document.getElementById('editPromoExpiryTime').value;
+                const expiryTimestamp = new Date(expiryDateTime).getTime();
+                
+                const discountValue = discountType === 'fixed' 
+                    ? document.getElementById('editPromoFixedValue').value 
+                    : document.getElementById('editPromoPercentageValue').value;
+
+                const promoRef = ref(database, `promo_codes/${code}`);
+                const snapshot = await get(promoRef);
+                const existingPromo = snapshot.val();
+
+                const updatedPromo = {
+                    ...existingPromo,
+                    discount_type: discountType,
+                    discount_percent: String(discountValue),
+                    expiry_date: String(expiryTimestamp),
+                    max_uses: String(document.getElementById('editPromoUsageLimit').value),
+                    min_purchase: String(document.getElementById('editPromoMinPurchase').value)
+                };
+
+                await set(promoRef, updatedPromo);
+
+                showAlert('✅ Promo code updated successfully!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('editPromoModal')).hide();
+                loadPromoCodes();
+
+            } catch (error) {
+                showAlert('❌ Error: ' + error.message, 'danger');
+            }
+        });
+
+        // Copy Promo Code
+        window.copyPromoCode = function(code) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => {
+                    showAlert('✅ Promo code copied: ' + code, 'success');
+                }).catch((err) => {
+                    // Fallback method
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        showAlert('✅ Promo code copied: ' + code, 'success');
+                    } catch (err) {
+                        showAlert('❌ Failed to copy promo code', 'danger');
+                    }
+                    document.body.removeChild(textArea);
+                });
+            } else {
+                // Fallback method for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showAlert('✅ Promo code copied: ' + code, 'success');
+                } catch (err) {
+                    showAlert('❌ Failed to copy promo code', 'danger');
+                }
+                document.body.removeChild(textArea);
+            }
+        };
+
+        // Share Promo Code - Social Media Options
+        window.sharePromoCode = function(code) {
+            const shareText = `🎉 Use promo code: ${code} to get amazing discounts!`;
+            const encodedText = encodeURIComponent(shareText);
+            
+            // Create modal HTML for share options
+            const shareModalHTML = `
+                \u003Cdiv class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+                    \u003Cdiv class="modal-dialog modal-dialog-centered">
+                        \u003Cdiv class="modal-content">
+                            \u003Cdiv class="modal-header">
+                                \u003Ch5 class="modal-title">\u003Ci class="fas fa-share-alt">\u003C/i> Share Promo Code\u003C/h5>
+                                \u003Cbutton type="button" class="btn-close" data-bs-dismiss="modal">\u003C/button>
+                            \u003C/div>
+                            \u003Cdiv class="modal-body">
+                                \u003Cdiv style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                    \u003Cbutton class="btn btn-success" onclick="shareToWhatsApp('${code}', '${encodedText}')" style="padding: 15px; border-radius: 12px;">
+                                        \u003Ci class="fab fa-whatsapp" style="font-size: 24px;">\u003C/i>\u003Cbr>
+                                        WhatsApp
+                                    \u003C/button>
+                                    \u003Cbutton class="btn btn-info" onclick="shareToTelegram('${code}', '${encodedText}')" style="padding: 15px; border-radius: 12px; background: #0088cc; border: none;">
+                                        \u003Ci class="fab fa-telegram" style="font-size: 24px;">\u003C/i>\u003Cbr>
+                                        Telegram
+                                    \u003C/button>
+                                    \u003Cbutton class="btn btn-primary" onclick="shareToFacebook('${code}')" style="padding: 15px; border-radius: 12px; background: #1877f2; border: none;">
+                                        \u003Ci class="fab fa-facebook" style="font-size: 24px;">\u003C/i>\u003Cbr>
+                                        Facebook
+                                    \u003C/button>
+                                    \u003Cbutton class="btn btn-dark" onclick="shareToTwitter('${code}', '${encodedText}')" style="padding: 15px; border-radius: 12px; background: #000; border: none;">
+                                        \u003Ci class="fab fa-twitter" style="font-size: 24px;">\u003C/i>\u003Cbr>
+                                        Twitter
+                                    \u003C/button>
+                                    \u003Cbutton class="btn btn-secondary" onclick="copyShareText('${shareText.replace(/'/g, "\\\\\\'")}')" style="padding: 15px; border-radius: 12px;">
+                                        \u003Ci class="fas fa-copy" style="font-size: 24px;">\u003C/i>\u003Cbr>
+                                        Copy Text
+                                    \u003C/button>
+                                    \u003Cbutton class="btn btn-outline-primary" onclick="shareNative('${shareText.replace(/'/g, "\\\\\\'")}')" style="padding: 15px; border-radius: 12px;">
+                                        \u003Ci class="fas fa-share" style="font-size: 24px;">\u003C/i>\u003Cbr>
+                                        More
+                                    \u003C/button>
+                                \u003C/div>
+                            \u003C/div>
+                        \u003C/div>
+                    \u003C/div>
+                \u003C/div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('shareModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', shareModalHTML);
+            
+            // Show modal
+            const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+            shareModal.show();
+            
+            // Remove modal from DOM when hidden
+            document.getElementById('shareModal').addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
+        };
+
+        // Share to WhatsApp
+        window.shareToWhatsApp = function(code, encodedText) {
+            const url = `https://wa.me/?text=${encodedText}`;
+            window.open(url, '_blank');
+            bootstrap.Modal.getInstance(document.getElementById('shareModal')).hide();
+            showAlert('✅ Opening WhatsApp...', 'success');
+        };
+
+        // Share to Telegram
+        window.shareToTelegram = function(code, encodedText) {
+            const url = `https://t.me/share/url?text=${encodedText}`;
+            window.open(url, '_blank');
+            bootstrap.Modal.getInstance(document.getElementById('shareModal')).hide();
+            showAlert('✅ Opening Telegram...', 'success');
+        };
+
+        // Share to Facebook
+        window.shareToFacebook = function(code) {
+            const shareText = `🎉 Use promo code: ${code} to get amazing discounts!`;
+            const url = `https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(shareText)}`;
+            window.open(url, '_blank');
+            bootstrap.Modal.getInstance(document.getElementById('shareModal')).hide();
+            showAlert('✅ Opening Facebook...', 'success');
+        };
+
+        // Share to Twitter
+        window.shareToTwitter = function(code, encodedText) {
+            const url = `https://twitter.com/intent/tweet?text=${encodedText}`;
+            window.open(url, '_blank');
+            bootstrap.Modal.getInstance(document.getElementById('shareModal')).hide();
+            showAlert('✅ Opening Twitter...', 'success');
+        };
+
+        // Copy share text
+        window.copyShareText = function(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('shareModal')).hide();
+                    showAlert('✅ Text copied to clipboard!', 'success');
+                }).catch(() => {
+                    fallbackCopyMethod(text);
+                });
+            } else {
+                fallbackCopyMethod(text);
+            }
+        };
+
+        // Native share (for mobile devices)
+        window.shareNative = async function(text) {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Promo Code',
+                        text: text
+                    });
+                    bootstrap.Modal.getInstance(document.getElementById('shareModal')).hide();
+                    showAlert('✅ Shared successfully!', 'success');
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        showAlert('❌ Failed to share', 'danger');
+                    }
+                }
+            } else {
+                showAlert('⚠️ Native share not supported on this device', 'warning');
+            }
+        };
+
+        // Fallback copy method
+        function fallbackCopyMethod(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                bootstrap.Modal.getInstance(document.getElementById('shareModal')).hide();
+                showAlert('✅ Text copied to clipboard!', 'success');
+            } catch (err) {
+                showAlert('❌ Failed to copy text', 'danger');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Delete Promo Code
+        window.deletePromoCode = async function(code) {
+            if (confirm(`Are you sure you want to delete promo code: ${code}?`)) {
+                try {
+                    const promoRef = ref(database, `promo_codes/${code}`);
+                    await remove(promoRef);
+                    showAlert('✅ Promo code deleted successfully!', 'success');
+                    loadPromoCodes();
+                } catch (error) {
+                    showAlert('❌ Error: ' + error.message, 'danger');
+                }
+            }
+        };
+
+        // Initial Load
+        loadDashboard();
+    \u003C/script>
+
+\u003C/body>\u003C/html>
